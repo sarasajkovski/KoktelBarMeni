@@ -11,6 +11,7 @@ typedef struct {
 
 void prikaziGlavniIzbornik();
 void prviMenu(int izbor, char** fileIme);
+void ocistiUlaznitok();
 void ispisiCijeliKoktel(const char* nazivDatoteke);                                 
 void ispisiDetaljeKoktela(int odabirKoktela, int kategorija, FILE* racun);
 float racunanjeCijenaGin(const char* nazivDatoteke, float koktel1, float koktel2, float koktel3, FILE* racun);
