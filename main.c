@@ -78,9 +78,18 @@ int main() {
             ukupnaCijena += novaCijenaPica; break; }
     default: printf("Pogresan odabir.\n"); break;
     }
- 
+
     dodatniOdabir(&ukupnaCijena, racun);
+    
+     long int pozicija = ftell(racun);
+    if (pozicija == -1L) {
+        perror("Greska pri dobivanju pozicije u datoteci");
+        return 1;
+    }
+    printf("Broj narudzbe: %ld\n", pozicija);
+    
     ispisUkupneCijene(ukupnaCijena, racun);
+    
     free(fileIme);
     fclose(racun);
 
