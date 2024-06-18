@@ -53,19 +53,24 @@ void prikaziGlavniIzbornik() {
 }
 
 
-void prviMenu(int izbor, char** fileIme) {
+void ocistiUlazniTok() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
+void prviMenu(int *izbor, char** fileIme) {
 
     static const char* datoteke[] = {
-        "GIN.txt",
-        "TEQUILLA.txt",
-        "RUM.txt",
-        "VODKA.txt",
-        "BEZALKOHOLNAPICA.txt"
+    "GIN.txt",
+    "TEQUILLA.txt",
+    "RUM.txt",
+    "VODKA.txt",
+    "BEZALKOHOLNAPICA.txt"
     };
 
     const char* imeDatoteke = NULL;
 
-    switch (izbor) {
+    switch (*izbor) {
     case 1: imeDatoteke = "GIN.txt"; break;
     case 2: imeDatoteke = "TEQUILLA.txt"; break;
     case 3: imeDatoteke = "RUM.txt"; break;
@@ -74,9 +79,14 @@ void prviMenu(int izbor, char** fileIme) {
     default:
         do {
             printf("Izaberite jednu od stranica: ");
-        } while (scanf("%d", &izbor) != 1 || izbor < 1 || izbor > 5);
-        
-        switch (izbor) {
+            while (scanf("%d", izbor) != 1 || *izbor < 1 || *izbor > 5) {
+                printf("Ne postoji ta stranica.");
+                ocistiUlazniTok();
+                //printf("Ne postoji ta stranica.");
+            }
+        } while (*izbor < 1 || *izbor>5);
+
+        switch (*izbor) {
         case 1: imeDatoteke = "GIN.txt"; break;
         case 2: imeDatoteke = "TEQUILLA.txt"; break;
         case 3: imeDatoteke = "RUM.txt"; break;
@@ -85,6 +95,7 @@ void prviMenu(int izbor, char** fileIme) {
         }
         break;
     }
+
 
     if (imeDatoteke == NULL) {
         exit(EXIT_FAILURE);
@@ -98,6 +109,7 @@ void prviMenu(int izbor, char** fileIme) {
         strcpy(*fileIme, imeDatoteke);
      }
 }
+
 
 
 void ispisiCijeliKoktel(const char* nazivDatoteke) {
