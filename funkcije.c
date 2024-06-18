@@ -82,7 +82,6 @@ void prviMenu(int *izbor, char** fileIme) {
             while (scanf("%d", izbor) != 1 || *izbor < 1 || *izbor > 5) {
                 printf("Ne postoji ta stranica.");
                 ocistiUlazniTok();
-                //printf("Ne postoji ta stranica.");
             }
         } while (*izbor < 1 || *izbor>5);
 
