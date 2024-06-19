@@ -22,12 +22,9 @@ int main() {
         perror("Greska pri otvaranju datoteke");
         return 1;
     }
-    fprintf(racun, "          ISPIS RACUNA - Koktel Bar\n\n"); 
-    long int pocetak = ftell(racun); 
+    fprintf(racun, "          ISPIS RACUNA - Koktel Bar\n\n");
     
-   
     qsort(rezervacija, brojRezervacija, sizeof(Rezervacija), comparePrezimena);   // 21.
-
 
     char trazenoIme[MAX_LENGTH];                                          
     printf("----------------------------\n");
@@ -39,8 +36,8 @@ int main() {
     trazenoIme[strcspn(trazenoIme, "\n")] = '\0';
 
 
-    Rezervacija kljuc = { "",0 };
-    strcpy(kljuc.prezime, trazenoIme);
+    Rezervacija kljucPretrazivanja = { "",0 };
+    strcpy(kljucPretrazivanja.prezime, trazenoIme);
     Rezervacija* rezultat = bsearch(&kljuc, rezervacija, brojRezervacija, sizeof(Rezervacija), comparePrezimena);             // 22.
     if (rezultat != NULL) {
         printf("Rezervacija | %s | za |%d| je pronadena.\n\n", trazenoIme, rezervacija->brojOsoba);
@@ -51,8 +48,6 @@ int main() {
         return 1;
     }
     fprintf(racun, "Rezervacija na prezime: %s\nBroj osoba: %d\n\n", rezervacija->prezime, rezervacija->brojOsoba);
-
-
 
     int izbor;
     char* fileIme = NULL;
@@ -81,7 +76,7 @@ int main() {
 
     dodatniOdabir(&ukupnaCijena, racun);
     
-     long int pozicija = ftell(racun);
+    long int pozicija = ftell(racun);
     if (pozicija == -1L) {
         perror("Greska pri dobivanju pozicije u datoteci");
         return 1;
