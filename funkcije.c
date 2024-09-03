@@ -4,44 +4,52 @@
 #include <string.h>
 #include "Header.h"
 
+
 int brojRezervacija = 1;
 
 void unesiRezervaciju(Rezervacija** rez) {
-    
+
     *rez = (Rezervacija*)malloc(sizeof(Rezervacija));
     if (*rez == NULL) {
-        perror("Greska pri alociranju memorije");
-        exit(EXIT_FAILURE);
+        printf("Greska pri alokaciji memorije.\n");
+        exit(1);
     }
 
-    (*rez)->prezime[0] = '\0';       
-    (*rez)->brojOsoba = 0;
-
-    printf("===================================\n");
-    printf("         Dobrodosli u bar!          \n");
-    printf("===================================\n");
-    printf("Na koje prezime je rezervacija? -  ");
-    if (scanf("%99s", (*rez)->prezime) != 1) {
-        printf("Greska pri unosu prezimena.\n");
-        free(*rez);
-        exit(EXIT_FAILURE);
+    printf("====================================\n");
+    printf("         Dobrodosli u koktel bar!         \n");
+    printf("====================================\n");
+    printf("Unesite prezime: ");
+    if (fgets((*rez)->prezime, MAX_LENGTH, stdin) == NULL) {
+        perror("Greska pri unosu prezimena");
+        exit(1);
     }
+    (*rez)->prezime[strcspn((*rez)->prezime, "\n")] = '\0'; //uklanajnje reda
 
-    printf("Za koliko osoba? - ");
-    if (scanf("%d", &((*rez)->brojOsoba)) != 1) {
-        printf("Greska pri unosu broja osoba.\n");
-        free(*rez);
-        exit(EXIT_FAILURE);
+    printf("Unesite broj osoba: ");
+    if (scanf("%d", &(*rez)->brojOsoba) != 1) {
+        printf("Krivi unos.\n");
+        (*rez)->brojOsoba = 0;  // 0 ako je krivi unos
     }
-    printf("U redu sacekajte.\n\n");
-
-    brojRezervacija++;
+    ocistiUlazniTok(); 
 }
+ 
 
+void prikaziIzbornik() {
+
+    printf("\n");
+    printf("//////////////////////////////////\n\n");
+    printf("1. Uzmi narudzbu\n");
+    printf("2. Pregled narudzbi\n");
+    printf("3. Izbrisi narudzbu\n");
+    printf("4. Promjenite broj osoba\n");
+    printf("5. Provjerite narudzbu\n");
+    printf("6. Kraj radnog vremena\n\n");
+    printf("///////////////////////////////////\n\n");
+}
 
 void prikaziGlavniIzbornik() {
 
-    printf("                                  =============================\n");
+    printf("\n                                  =============================\n");
     printf("                                           KOKTEL MENI\n");
     printf("                                  =============================\n");
     printf("                                        1. GIN KOKTELI\n");
@@ -49,24 +57,15 @@ void prikaziGlavniIzbornik() {
     printf("                                         3. RUM KOKTELI\n");
     printf("                                        4. VODKA KOKTELI\n");
     printf("                                      5. BEZALKOHOLNA PICA\n");
-    printf("                                  ==============================\n");
+    printf("                                  ==============================\n\n");
 }
-
 
 void ocistiUlazniTok() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
-void prviMenu(int *izbor, char** fileIme) {
-
-    static const char* datoteke[] = {
-    "GIN.txt",
-    "TEQUILLA.txt",
-    "RUM.txt",
-    "VODKA.txt",
-    "BEZALKOHOLNAPICA.txt"
-    };
+void prviMenu(int* izbor, char** fileIme) {
 
     const char* imeDatoteke = NULL;
 
@@ -106,7 +105,7 @@ void prviMenu(int *izbor, char** fileIme) {
             exit(EXIT_FAILURE);
         }
         strcpy(*fileIme, imeDatoteke);
-     }
+    }
 }
 
 
@@ -206,13 +205,12 @@ void ispisiDetaljeKoktela(int odabirKoktela, int kategorija, FILE* racun) {
 
         FILE* file = fopen(datoteka, "r");
         if (file == NULL) {
-            //perror("Nije moguce otvoriti datoteku");
             return;
         }
 
-        char c;
+        char c;  //cita iz datoteke
         while ((c = fgetc(file)) != EOF) {
-            fputc(c, racun);
+            fputc(c, racun); 
         }
         fprintf(racun, "\n");
 
@@ -331,55 +329,141 @@ float racunanjePica(const char* nazivDatoteke, float koktel1, float koktel2, flo
 }
 
 
-
 int dodatniOdabir(float* ukupnaCijena, FILE* racun) {
 
     int odabirGlavnog;
-    char* fileIme = NULL;
     int odabir;
 
-    do {
-        printf("Zelite li izabrati jos nesto? Da(1)/Ne(2): ");
-        if (scanf("%d", &odabir) != 1) {
-            printf("Da ili ne?.\n");
-            continue;
+    printf("Zelite li izabrati jos nesto? Da(1)/Ne(2): ");
+    if (scanf("%d", &odabir) != 1) {
+        printf("Da ili ne?.\n");
+        ocistiUlazniTok();
+        return dodatniOdabir(ukupnaCijena, racun); // Rekurzivni poziv
+    }
+
+    if (odabir == 1) {
+        prikaziGlavniIzbornik();
+        printf("Odaberite stranicu: ");
+        if (scanf("%d", &odabirGlavnog) != 1) {
+            printf("Molimo odaberite jednu od stranica.\n");
+            ocistiUlazniTok();
+            return dodatniOdabir(ukupnaCijena, racun);
         }
 
-        if (odabir == 1) {
-            prikaziGlavniIzbornik();
-            printf("Odaberite stranicu: ");
-            if (scanf("%d", &odabirGlavnog) != 1) {
-                printf("Molimo odaberite jednu od stranica.\n");
-                continue;
-            }
-
-            switch (odabirGlavnog) {
-            case 1: *ukupnaCijena += racunanjeCijenaGin("GIN.txt", 4.99f, 4.49f, 5.39f, racun); break;
-            case 2: *ukupnaCijena += racunanjeCijenaTequilla("TEQUILLA.txt", 4.99f, 3.99f, 4.99f, 4.39f, racun); break;
-            case 3: *ukupnaCijena += racunanjeCijenaRum("RUM.txt", 4.99f, 4.59f, 4.99f, 4.79f, racun); break;
-            case 4: *ukupnaCijena += racunanjeCijenaVodka("VODKA.txt", 5.99f, 4.90f, 5.30f, racun); break;
-            case 5: { float novaCijenaPica = racunanjePica("BEZALKOHOLNAPICA.txt", 2.20f, 2.20f, 1.80f, 2.00f, 2.10f, 1.90f, racun);
-                      *ukupnaCijena += novaCijenaPica;  break; }
-            default: printf("Pogresan odabir.\n"); break;
-            }
+        switch (odabirGlavnog) {
+        case 1: *ukupnaCijena += racunanjeCijenaGin("GIN.txt", 4.99f, 4.49f, 5.39f, racun); break;
+        case 2: *ukupnaCijena += racunanjeCijenaTequilla("TEQUILLA.txt", 4.99f, 3.99f, 4.99f, 4.39f, racun); break;
+        case 3: *ukupnaCijena += racunanjeCijenaRum("RUM.txt", 4.99f, 4.59f, 4.99f, 4.79f, racun); break;
+        case 4: *ukupnaCijena += racunanjeCijenaVodka("VODKA.txt", 5.99f, 4.90f, 5.30f, racun); break;
+        case 5: *ukupnaCijena += racunanjePica("BEZALKOHOLNAPICA.txt", 2.20f, 2.20f, 1.80f, 2.00f, 2.10f, 1.90f, racun); break;
+        default: printf("Pogresan odabir.\n"); break;
         }
-        else if (odabir == 2) {
-            printf("U redu, ispisat cemo racun (:\n");
-        }
-        else {
-            printf("Nevazeci odabir.\n");
-        }
-
-    } while (odabir != 2);
-
-    free(fileIme);
-    return 1;
+        return dodatniOdabir(ukupnaCijena, racun);
+    }
+    else if (odabir == 2) {
+        printf("U redu, ispisat cemo racun (:\n");
+        return 1;
+    }
+    else {
+        printf("Nevazeci odabir.\n");
+        ocistiUlazniTok();
+        return dodatniOdabir(ukupnaCijena, racun);
+    }
 }
 
+void ispisRezervacije(Rezervacija* rezervacija, FILE* racun, int redniBroj) {
+
+    fprintf(racun, "REZERVACIJA %d: \n", redniBroj);
+    fprintf(racun, "Prezime: %s\n", rezervacija->prezime);
+    fprintf(racun, "Broj osoba: %d\n", rezervacija->brojOsoba);
+}
 
 void ispisUkupneCijene(float ukupnaCijena, FILE* racun) {
 
     fprintf(racun, "\nUKUPNA CIJENA: %.2f\n\n\n", ukupnaCijena);
     fprintf(racun, "                  Hvala!\n\n");
     fprintf(racun, "---------------------------------------------");
+    fprintf(racun, "\n\n");
+}
+
+
+void pregledNarudzbi() {
+
+    FILE* file = fopen("narudzbe.txt", "r");
+    if (file == NULL) {
+        perror("Greska pri otvaranju datoteke.");
+        return;
+    }
+
+    char c;
+    while ((c = fgetc(file)) != EOF) {
+        putchar(c);
+    }
+    fclose(file);
+}
+
+void spremiNarudzbe() {
+
+    FILE* file = fopen("narudzbe.txt", "w");
+    if (file == NULL) {
+        perror("Greska pri otvaranju datoteke.");
+        return;
+    }
+
+    for (int i = 0; i < brojNarudzbi; i++) {
+        Rezervacija* r = narudzbe[i];
+        fprintf(file, "#%d NARUDZBA\n", i + 1);
+        fprintf(file, "Prezime: %s\n", r->prezime);
+        fprintf(file, "Broj osoba: %d\n", r->brojOsoba);
+        fprintf(file, "\n");
+    }
+
+    fclose(file);
+}
+
+void izbrisiNarudzbu(int broj) {
+
+    if (broj < 1 || broj > brojNarudzbi) {
+        printf("Ne postoji takva narudzba.\n");
+        return;
+    }
+
+    free(narudzbe[broj - 1]); 
+    for (int i = broj - 1; i < brojNarudzbi - 1; i++) {
+        narudzbe[i] = narudzbe[i + 1];
+    }
+    brojNarudzbi--;
+
+    spremiNarudzbe();
+
+    printf("Narudzba #%d je izbrisana.\n", broj);
+}
+
+void promijeniBrojOsoba(Rezervacija* rezervacija, int noviBrojOsoba) {
+    rezervacija->brojOsoba = noviBrojOsoba;
+}
+
+void azurirajNarudzbe(Rezervacija* narudzbe[], int brojNarudzbi, const char* imeDatoteke) {
+    FILE* datoteka = fopen(imeDatoteke, "w");
+    if (datoteka == NULL) {
+        perror("Greska pri otvaranju datoteke");
+        return;
+    }
+
+    for (int i = 0; i < brojNarudzbi; i++) {
+        fprintf(datoteka, "Redni broj: %d, Prezime: %s, Broj osoba: %d\n", i + 1, narudzbe[i]->prezime, narudzbe[i]->brojOsoba);
+    }
+
+    fclose(datoteka);
+}
+
+void azurirajRacun(Rezervacija* rezervacija, const char* imeDatoteke) {
+    FILE* racun = fopen(imeDatoteke, "a");
+    if (racun == NULL) {
+        perror("Greska pri otvaranju datoteke");
+        return;
+    }
+
+    ispisRezervacije(rezervacija, racun, brojNarudzbi);
+    fclose(racun);
 }
